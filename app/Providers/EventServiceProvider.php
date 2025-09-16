@@ -3,9 +3,13 @@
 namespace App\Providers;
 
 use App\Events\Order\CouponAppliedEvent;
+use App\Events\Order\CouponFailedEvent;
 use App\Events\Order\InventoryDeductedEvent;
+use App\Events\Order\InventoryFailedEvent;
 use App\Events\Order\OrderCreatedEvent;
 use App\Events\Order\PaymentCompletedEvent;
+use App\Events\Order\PaymentFailedEvent;
+use App\Listeners\Order\HandleOrderFailureListener;
 use App\Listeners\Order\ProcessCouponListener;
 use App\Listeners\Order\ProcessInventoryListener;
 use App\Listeners\Order\ProcessPaymentListener;
@@ -42,6 +46,19 @@ class EventServiceProvider extends ServiceProvider
 
         PaymentCompletedEvent::class => [
             SendOrderNotificationListener::class,
+        ],
+
+        // 실패 이벤트 리스너 등록
+        PaymentFailedEvent::class => [
+            HandleOrderFailureListener::class.'@handlePaymentFailed',
+        ],
+
+        InventoryFailedEvent::class => [
+            HandleOrderFailureListener::class.'@handleInventoryFailed',
+        ],
+
+        CouponFailedEvent::class => [
+            HandleOrderFailureListener::class.'@handleCouponFailed',
         ],
     ];
 
